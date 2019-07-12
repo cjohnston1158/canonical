@@ -10,7 +10,7 @@ profile_TARGET="${full_PATH}/profile"
 [[ -f ${full_PATH} ]] || mkdir -p ${full_PATH}
 
 # Check/Install whois package for salting the password
-[[ $(dpkg -l | grep whois ; echo $?) == 0 ]] || apt install whois -y
+[[ $(rpm -qa | grep whois-nls ; echo $?) == 0 ]] || apt install whois -y
 
 clear
 }
