@@ -9,7 +9,7 @@
 
 #### 01. Create CCIO Mini-Stack Profile
 ```sh
-wget https://git.io/fjVUb -qO /tmp/profile && source /tmp/profile
+wget https://git.io/ -qO /tmp/profile && source /tmp/profile
 ```
 #### 02. Update System && Install helper packages
 ```sh
