@@ -93,19 +93,25 @@ EOF
 ````
 #### 07. Write mgmt1 interface netplan config
 ````sh
-cat <<EOF > /etc/netplan/80-mgmt1.yaml
-# Configure mgmt1 on 'internal' bridge
-# For more configuration examples, see: https://netplan.io/examples
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    mgmt1:
-      optional: true
-      dhcp4: false
-      dhcp6: false
-      addresses:
-        - ${ministack_SUBNET}.2/24
+cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-mgmt1
+NAME=mgmt1
+DEVICE=mgmt1
+PREFIX=24
+UUID=$(uuidgen mgmt0)
+DNS1=${ministack_SUBNET}.1
+IPADDR=${ministack_SUBNET}.2
+GATEWAY=${ministack_SUBNET}.1
+HWADDR=$(echo "${HOSTNAME} internal mgmt1" | md5sum | sed 's/^\(..\)\(..\)\(..\)\(..\)\(..\).*$/02\:\1\:\2\:\3\:\4\:\5/')
+DNS2=8.8.8.8
+BOOTPROTO=none
+ONBOOT=yes
+NM_CONTROLLED="no"
+TYPE=Ethernet
+DHCPV6C=no
+HOTPLUG=yes
+IPV6INIT=no
+DEFROUTE=no
+IPV4_FAILURE_FATAL=no
 EOF
 ````
 #### 08. Add OVS Orphan Port Cleaning Utility
