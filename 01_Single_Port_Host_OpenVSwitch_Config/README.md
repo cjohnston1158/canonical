@@ -17,9 +17,10 @@ WARNING: Exercise caution when performing this procedure remotely as this may ca
 ![CCIO_Hypervisor-mini_Stack_Diagram](web/drawio/single-port-ovs-host.svg)
 
 -------
-#### 01. Update system && Install Packages
+#### 01. Install && enable OpenVSwitch Package
 ```sh
-apt install -y openvswitch-switch
+dnf install -y openvswitch
+systemctl enable openvswitch && systemctl start openvswitch
 ```
 #### 02. Write physical network ingress port Networkd Config [EG: 'eth0']
   - NOTE: export name of nic device your primary host network traffic will traverse (EG: 'eth0' in this example)
