@@ -119,7 +119,7 @@ append_bashrc () {
   # Build new .bashrc file
   [[ $(grep mini-stack /etc/skel/.bashrc ; echo $?) == 0 ]] \
       || echo "source /etc/ccio/mini-stack/profile" >>/etc/skel/.bashrc
-  unalias cp
+  unalias cp 2>/dev/null \
   cp -f /etc/skel/.bashrc ~
 }
 
