@@ -27,16 +27,18 @@ GRUB_CMDLINE_LINUX_DEFAULT="\${GRUB_CMDLINE_LINUX_DEFAULT} debug intel_iommu=on 
 EOF
 ```
 ```sh
-update-grub
+grub2-mkconfig -o /boot/grub2/grub.cfg
 ```
 #### 04. Write eth0 netplan config
 ```sh
-cat <<EOF >/etc/netplan/99-eth0.yaml
-network:
-  version: 2
-  ethernets:
-    eth0:
-      dhcp4: yes
+cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-eth0
+DEVICE=eth0
+BOOTPROTO=dhcp
+ONBOOT=yes
+NM_CONTROLLED="no"
+TYPE=Ethernet
+DHCPV6C=no
+HOTPLUG=yes
 EOF
 ```
 #### 05. Reboot
