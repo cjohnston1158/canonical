@@ -64,29 +64,32 @@ IPv6AcceptRA=no
 LinkLocalAddressing=no
 EOF
 ````
-#### 05. Disable original Netplan Config
+#### 05. Disable DHCP on 'eth0' Config
 ````sh
-for yaml in $(ls /etc/netplan/); do sed -i 's/^/#/g' /etc/netplan/${yaml}; done
+sed 's/BOOTPROTO=dhcp/BOOTPROTO=none/g' etc/sysconfig/network-scripts/ifcfg-eth0
 ````
-#### 06. Write mgmt0 interface netplan config
+#### 06. Write mgmt0 interface ifcfg config
 ````sh
-cat <<EOF >/etc/netplan/80-mgmt0.yaml
-# For more configuration examples, see: https://netplan.io/examples                                                   
-# OVS 'external' Bridge Port 'mgmt0' Configuration
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    mgmt0:
-      optional: true
-      addresses:
-        - $(ip a s ${external_NIC} | awk '/inet /{print $2}' | head -n 1)
-      gateway4: $(ip r | awk '/default /{print $3}' | head -n 1)
-      nameservers:
-        addresses: 
-          - $(systemd-resolve --status | grep "DNS Server" | awk '{print $3}')
+cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-mgmt0
+NAME=mgmt0
+DEVICE=mgmt0
+UUID=$(uuidgen mgmt0)
+GATEWAY=$(ip r | awk '/default /{print $3}' | head -n 1)
+PREFIX=$(ip a s ${external_NIC} | awk -F'[ / ]' '/inet /{print $7}' | head -n 1)
+IPADDR=$(ip a s ${external_NIC} | awk -F'[ / ]' '/inet /{print $6}' | head -n 1)
+DNS1=$(systemd-resolve --status | grep "Current DNS Server" | awk '{print $4}' | head -n 1)
+DNS2=$(systemd-resolve --status | grep "Fallback DNS Server" | awk '{print $4}' | head -n 1)
+HWADDR=$(echo "${HOSTNAME} external mgmt0" | md5sum | sed 's/^\(..\)\(..\)\(..\)\(..\)\(..\).*$/02\:\1\:\2\:\3\:\4\:\5/')
+BOOTPROTO=none
+ONBOOT=yes
+NM_CONTROLLED="no"
+TYPE=Ethernet
+DHCPV6C=no
+HOTPLUG=yes
+IPV6INIT=no
+DEFROUTE=yes
+IPV4_FAILURE_FATAL=no
 EOF
-
 ````
 #### 07. Write mgmt1 interface netplan config
 ````sh
