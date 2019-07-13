@@ -21,10 +21,7 @@ dnf install -y dnf install neovim lnav openssh-server snapd pastebinit
 mkdir /etc/default/grub.d 2>/dev/null
 ```
 ```sh
-cat <<EOF >/etc/default/grub.d/99-libvirt.cfg
-# Enable PCI Passthrough + Nested Virtual Machines + Revert NIC Interface Naming
-GRUB_CMDLINE_LINUX_DEFAULT="\${GRUB_CMDLINE_LINUX_DEFAULT} debug intel_iommu=on iommu=pt kvm_intel.nested=1 net.ifnames=0 biosdevname=0 pci=noaer"
-EOF
+sed -i 's/quiet/debug intel_iommu=on iommu=pt kvm_intel.nested=1 net.ifnames=0 biosdevname=0 pci=noaer/g' /etc/default/grub
 ```
 ```sh
 grub2-mkconfig -o /boot/grub2/grub.cfg
@@ -47,7 +44,7 @@ EOF
 ## OPTIONAL
 ##### OPT 01. Switch default editor from nano to vim
 ```sh
-update-alternatives --set editor /usr/bin/vim.tiny
+update-alternatives --set editor /usr/bin/vim
 ```
 ##### OPT 02. Disable Lid Switch Power/Suspend (if building on a laptop)
 ```sh
