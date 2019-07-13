@@ -28,6 +28,7 @@ EOF
 ```
 ```sh
 grub2-mkconfig -o /boot/grub2/grub.cfg
+grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
 ```
 #### 04. Write eth0 netplan config
 ```sh
