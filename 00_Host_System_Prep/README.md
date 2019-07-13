@@ -13,8 +13,8 @@ wget https://git.io/fjXkH -qO /tmp/profile && source /tmp/profile
 ```
 #### 02. Update System && Install helper packages
 ```sh
-apt update && apt upgrade -y && apt dist-upgrade -y && apt autoremove -y
-apt install --install-recommends -y whois neovim lnav openssh-server ssh-import-id snapd pastebinit linux-generic-hwe-18.04-edge
+dnf update -y && dnf upgrade -y && dnf distro-sync -y
+dnf install -y dnf install neovim lnav openssh-server snapd pastebinit
 ```
 #### 03. Append GRUB Options for Libvirt & Networking Kernel Arguments
 ```sh
