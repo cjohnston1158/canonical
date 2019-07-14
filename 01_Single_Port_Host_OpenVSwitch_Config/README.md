@@ -63,8 +63,8 @@ OVSBOOTPROTO="static"
 OVSBOOTPROTO="static"
 UUID=$(uuidgen internal)
 OVS_EXTRA="set bridge \$DEVICE other-config:hwaddr=\$MACADDR"
-GATEWAY="${ip r | grep -v "127.0" | awk '/default /{print $3}' | head -n 1}"
-IPADDR="${ip r | grep -v "127.0" | awk '/default /{print $5}' | head -n 1}"
+GATEWAY="$(ip r | grep -v "127.0" | awk '/default /{print $3}' | head -n 1)"
+IPADDR="$(ip r | grep -v "127.0" | awk '/default /{print $5}' | head -n 1)"
 MACADDR="${iface_MACADDR}"
 NETMASK="255.255.255.0"
 EOF
@@ -88,8 +88,8 @@ NM_CONTROLLED="no"
 OVSBOOTPROTO="static"
 UUID=$(uuidgen external)
 OVS_EXTRA="set bridge \$DEVICE other-config:hwaddr=\$MACADDR"
-GATEWAY="${ip r | grep -v "127.0" | awk '/default /{print $3}' | head -n 1}"
-IPADDR="${ip r | grep -v "127.0" | awk '/default /{print $5}' | head -n 1}"
+GATEWAY="$(ip r | grep -v "127.0" | awk '/default /{print $3}' | head -n 1)"
+IPADDR="$(ip r | grep -v "127.0" | awk '/default /{print $5}' | head -n 1)"
 MACADDR="${iface_MACADDR}"
 NETMASK="255.255.255.0"
 EOF
