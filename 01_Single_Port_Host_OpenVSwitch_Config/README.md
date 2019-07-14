@@ -30,14 +30,14 @@ systemctl disable NetworkManager
 export external_NIC="eth0"
 ```
 ```sh
-cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-eth0
+cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-${external_NIC}
 HOTPLUG=no
 ONBOOT="yes"
 BOOTPROTO="none"
 TYPE="OVSPort"
 DEVICETYPE="ovs"
 NM_CONTROLLED="no"
-UUID=$(uuidgen eth0)
+UUID=$(uuidgen ${external_NIC})
 OVS_BRIDGE="external"
 NAME="${external_NIC}"
 DEVICE="${external_NIC}"
