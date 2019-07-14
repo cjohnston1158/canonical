@@ -19,8 +19,10 @@ WARNING: Exercise caution when performing this procedure remotely as this may ca
 -------
 #### 01. Install && enable OpenVSwitch Package
 ```sh
-dnf install -y openvswitch
-systemctl enable openvswitch && systemctl start openvswitch
+dnf install -y openvswitch network-scripts
+systemctl enable network
+systemctl enable openvswitch
+systemctl disable NetworkManager
 ```
 #### 02. Write physical network ingress port ifcfg Config [EG: 'eth0']
   - NOTE: export name of nic device your primary host network traffic will traverse (EG: 'eth0' in this example)
@@ -29,15 +31,16 @@ export external_NIC="eth0"
 ```
 ```sh
 cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-eth0
-NAME="${external_NIC}"
-DEVICE="${external_NIC}"
-HWADDR="$(ip -o link show eth0 | awk '{print $(NF-2)}')"
-DEVICETYPE="ovs"
-TYPE="OVSPort"
-OVS_BRIDGE="external"
+HOTPLUG=no
 ONBOOT="yes"
 BOOTPROTO="none"
+TYPE="OVSPort"
+DEVICETYPE="ovs"
 NM_CONTROLLED="no"
+UUID=$(uuidgen eth0)
+OVS_BRIDGE="external"
+NAME="${external_NIC}"
+DEVICE="${external_NIC}"
 EOF
 ```
 #### 03. Write OVS  Bridge 'external' ifcfg Config
@@ -46,20 +49,25 @@ export iface_MACADDR=$(echo "${HOSTNAME} ${ministack_SUBNET} external" | md5sum 
 ```
 ```sh
 cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-external
+DELAY=0
+HOTPLUG=no
+IPV6INIT=no
+ONBOOT="yes"
 NAME="external"
 DEVICE="external"
+BOOTPROTO=static
+NM_CONTROLLED="no"
 DEVICETYPE="ovs"
 TYPE="OVSBridge"
-IPADDR="${ip r | grep -v "127.0" | awk '/default /{print $5}' | head -n 1}"
-NETMASK="255.255.255.0"
-GATEWAY="${ip r | grep -v "127.0" | awk '/default /{print $3}' | head -n 1}"
-MACADDR="${iface_MACADDR}"
-OVS_EXTRA="set bridge $DEVICE other-config:hwaddr=$MACADDR"
-ONBOOT="yes"
 OVSBOOTPROTO="static"
-NM_CONTROLLED="no"
+OVSBOOTPROTO="static"
+UUID=$(uuidgen internal)
+OVS_EXTRA="set bridge $DEVICE other-config:hwaddr=$MACADDR"
+GATEWAY="${ip r | grep -v "127.0" | awk '/default /{print $3}' | head -n 1}"
+IPADDR="${ip r | grep -v "127.0" | awk '/default /{print $5}' | head -n 1}"
+MACADDR="${iface_MACADDR}"
+NETMASK="255.255.255.0"
 EOF
-
 ```
 #### 04. Write OVS bridge 'internal' ifcfg Config
 ```sh
@@ -67,64 +75,23 @@ export iface_MACADDR=$(echo "${HOSTNAME} ${ministack_SUBNET} internal" | md5sum 
 ```
 ````sh
 cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-internal
-NAME="internal"
-DEVICE="internal"
-DEVICETYPE="ovs"
-TYPE="OVSBridge"
-IPADDR="${ministack_SUBNET}.2"
-NETMASK="255.255.255.0"
-GATEWAY="${ministack_SUBNET}.1"
-MACADDR="${iface_MACADDR}"
-OVS_EXTRA="set bridge $DEVICE other-config:hwaddr=$MACADDR"
+DELAY=0
+HOTPLUG=no
+IPV6INIT=no
 ONBOOT="yes"
+NAME="internal"
+DEVICETYPE="ovs"
+DEVICE="internal"
+TYPE="OVSBridge"
+BOOTPROTO="static"
+NM_CONTROLLED="no"
 OVSBOOTPROTO="static"
-NM_CONTROLLED="yes"
-EOF
-````
-#### 06. Write mgmt0 interface ifcfg config
-````sh
-cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-mgmt0
-NAME=mgmt0
-DEVICE=mgmt0
-UUID=$(uuidgen mgmt0)
-GATEWAY=$(ip r | awk '/default /{print $3}' | head -n 1)
-PREFIX=$(ip a s ${external_NIC} | awk -F'[ / ]' '/inet /{print $7}' | head -n 1)
-IPADDR=$(ip a s ${external_NIC} | awk -F'[ / ]' '/inet /{print $6}' | head -n 1)
-DNS1=$(systemd-resolve --status | grep "Current DNS Server" | awk '{print $4}' | head -n 1)
-DNS2=$(systemd-resolve --status | grep "Fallback DNS Server" | awk '{print $4}' | head -n 1)
-HWADDR=$(echo "${HOSTNAME} external mgmt0" | md5sum | sed 's/^\(..\)\(..\)\(..\)\(..\)\(..\).*$/02\:\1\:\2\:\3\:\4\:\5/')
-BOOTPROTO=none
-ONBOOT=yes
-NM_CONTROLLED="no"
-TYPE=Ethernet
-DHCPV6C=no
-HOTPLUG=yes
-IPV6INIT=no
-DEFROUTE=yes
-IPV4_FAILURE_FATAL=no
-EOF
-````
-#### 07. Write mgmt1 interface netplan config
-````sh
-cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-mgmt1
-NAME=mgmt1
-DEVICE=mgmt1
-PREFIX=24
-UUID=$(uuidgen mgmt0)
-DNS1=${ministack_SUBNET}.1
-IPADDR=${ministack_SUBNET}.2
-GATEWAY=${ministack_SUBNET}.1
-HWADDR=$(echo "${HOSTNAME} internal mgmt1" | md5sum | sed 's/^\(..\)\(..\)\(..\)\(..\)\(..\).*$/02\:\1\:\2\:\3\:\4\:\5/')
-DNS2=8.8.8.8
-BOOTPROTO=none
-ONBOOT=yes
-NM_CONTROLLED="no"
-TYPE=Ethernet
-DHCPV6C=no
-HOTPLUG=yes
-IPV6INIT=no
-DEFROUTE=no
-IPV4_FAILURE_FATAL=no
+UUID=$(uuidgen external)
+OVS_EXTRA="set bridge $DEVICE other-config:hwaddr=$MACADDR"
+GATEWAY="${ip r | grep -v "127.0" | awk '/default /{print $3}' | head -n 1}"
+IPADDR="${ip r | grep -v "127.0" | awk '/default /{print $5}' | head -n 1}"
+MACADDR="${iface_MACADDR}"
+NETMASK="255.255.255.0"
 EOF
 ````
 #### 08. Add OVS Orphan Port Cleaning Utility
@@ -142,43 +109,32 @@ EOF
 ````sh
 chmod +x /usr/bin/ovs-clear && ovs-clear
 ````
-#### 09. Build OVS Bridge external, port mgmt0, and apply configuration
+#### 09. Build OVS Bridge external and apply configuration
 ````sh
-cat <<EOF >/tmp/external-mgmt0-setup
-net_restart () {
-ovs-vsctl \
-  add-br external -- \
-  add-port external ${external_NIC} -- \
-  add-port external mgmt0 -- \
-  set interface mgmt0 type=internal -- \
-  set interface mgmt0 mac="$(echo "${HOSTNAME} external mgmt0" | md5sum | sed 's/^\(..\)\(..\)\(..\)\(..\)\(..\).*$/02\\:\1\\:\2\\:\3\\:\4\\:\5/')"
-systemctl restart systemd-networkd.service && netplan apply --debug
+cat <<EOF >/tmp/external-setup
+ovs-vsctl add-br external
+systemctl stop NetworkManager
+systemctl stop network
+systemctl stop openvswitch
+systemctl start openvswitch
+systemctl start network
 ovs-clear
-}
-net_restart
 EOF
-
 ````
 ````sh
 source /tmp/external-mgmt0-setup
 ````
-#### 10. Build OVS Bridge external, port mgmt1, and apply configuration
+#### 10. Build OVS Bridge internal and apply configuration
 ````sh
-cat <<EOF >/tmp/internal-mgmt1-setup
-ovs-vsctl \
-  add-br internal -- \
-  add-port internal mgmt1 -- \
-  set interface mgmt1 type=internal -- \
-  set interface mgmt1 mac="$(echo "$HOSTNAME internal mgmt1" | md5sum | sed 's/^\(..\)\(..\)\(..\)\(..\)\(..\).*$/02\\:\1\\:\2\\:\3\\:\4\\:\5/')"
-systemctl restart systemd-networkd.service && netplan apply --debug
+cat <<EOF >/tmp/internal-setup
+ovs-vsctl add-br internal
+systemctl restart network
 ovs-clear
 EOF
-
 ````
 ````sh
-source /tmp/internal-mgmt1-setup
+source /tmp/internal-setup
 ````
-
 -------
 ## Next sections
 - [Part 2 LXD On Open vSwitch Network]
