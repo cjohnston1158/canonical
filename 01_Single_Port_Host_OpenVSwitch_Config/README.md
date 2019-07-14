@@ -42,15 +42,18 @@ EOF
 ```
 #### 03. Write OVS  Bridge 'external' ifcfg Config
 ```sh
+export iface_MACADDR=$(echo "${HOSTNAME} ${ministack_SUBNET} external" | md5sum | sed 's/^\(..\)\(..\)\(..\)\(..\)\(..\).*$/02\:\1\:\2\:\3\:\4\:\5/')
+```
+```sh
 cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-external
 NAME="external"
 DEVICE="external"
 DEVICETYPE="ovs"
 TYPE="OVSBridge"
-IPADDR="192.168.0.18"
+IPADDR="${ip r | grep -v "127.0" | awk '/default /{print $5}' | head -n 1}"
 NETMASK="255.255.255.0"
-GATEWAY="192.168.0.1"
-MACADDR="${MACADDR}"
+GATEWAY="${ip r | grep -v "127.0" | awk '/default /{print $3}' | head -n 1}"
+MACADDR="${iface_MACADDR}"
 OVS_EXTRA="set bridge $DEVICE other-config:hwaddr=$MACADDR"
 ONBOOT="yes"
 OVSBOOTPROTO="static"
@@ -59,6 +62,9 @@ EOF
 
 ```
 #### 04. Write OVS bridge 'internal' ifcfg Config
+```sh
+export iface_MACADDR=$(echo "${HOSTNAME} ${ministack_SUBNET} internal" | md5sum | sed 's/^\(..\)\(..\)\(..\)\(..\)\(..\).*$/02\:\1\:\2\:\3\:\4\:\5/')
+```
 ````sh
 cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-internal
 NAME="internal"
@@ -68,11 +74,11 @@ TYPE="OVSBridge"
 IPADDR="${ministack_SUBNET}.2"
 NETMASK="255.255.255.0"
 GATEWAY="${ministack_SUBNET}.1"
-MACADDR="${MACADDR}"
+MACADDR="${iface_MACADDR}"
 OVS_EXTRA="set bridge $DEVICE other-config:hwaddr=$MACADDR"
 ONBOOT="yes"
 OVSBOOTPROTO="static"
-NM_CONTROLLED="no"
+NM_CONTROLLED="yes"
 EOF
 ````
 #### 06. Write mgmt0 interface ifcfg config
