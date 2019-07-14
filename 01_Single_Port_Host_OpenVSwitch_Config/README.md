@@ -122,7 +122,7 @@ ovs-clear
 EOF
 ````
 ````sh
-source /tmp/external-mgmt0-setup
+source /tmp/external-setup
 ````
 #### 10. Build OVS Bridge internal and apply configuration
 ````sh
