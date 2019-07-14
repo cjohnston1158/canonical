@@ -22,51 +22,58 @@ WARNING: Exercise caution when performing this procedure remotely as this may ca
 dnf install -y openvswitch
 systemctl enable openvswitch && systemctl start openvswitch
 ```
-#### 02. Write physical network ingress port Networkd Config [EG: 'eth0']
+#### 02. Write physical network ingress port ifcfg Config [EG: 'eth0']
   - NOTE: export name of nic device your primary host network traffic will traverse (EG: 'eth0' in this example)
 ```sh
 export external_NIC="eth0"
 ```
 ```sh
-cat <<EOF >/etc/systemd/network/${external_NIC}.network                                                    
-[Match]
-Name=${external_NIC}
-
-[Network]
-DHCP=no
-IPv6AcceptRA=no
-LinkLocalAddressing=no
+cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-eth0
+NAME="${external_NIC}"
+DEVICE="${external_NIC}"
+HWADDR="$(ip -o link show eth0 | awk '{print $(NF-2)}')"
+DEVICETYPE="ovs"
+TYPE="OVSPort"
+OVS_BRIDGE="external"
+ONBOOT="yes"
+BOOTPROTO="none"
+NM_CONTROLLED="no"
 EOF
-
 ```
-#### 03. Write OVS  Bridge 'external' Networkd Config
+#### 03. Write OVS  Bridge 'external' ifcfg Config
 ```sh
-cat <<EOF >/etc/systemd/network/external.network                                                    
-[Match]
-Name=external
-
-[Network]
-DHCP=no
-IPv6AcceptRA=no
-LinkLocalAddressing=no
+cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-external
+NAME="external"
+DEVICE="external"
+DEVICETYPE="ovs"
+TYPE="OVSBridge"
+IPADDR="192.168.0.18"
+NETMASK="255.255.255.0"
+GATEWAY="192.168.0.1"
+MACADDR="${MACADDR}"
+OVS_EXTRA="set bridge $DEVICE other-config:hwaddr=$MACADDR"
+ONBOOT="yes"
+OVSBOOTPROTO="static"
+NM_CONTROLLED="no"
 EOF
 
 ```
-#### 04. Write OVS bridge 'internal' Networkd Config
+#### 04. Write OVS bridge 'internal' ifcfg Config
 ````sh
-cat <<EOF >/etc/systemd/network/internal.network                                                    
-[Match]
-Name=internal
-
-[Network]
-DHCP=no
-IPv6AcceptRA=no
-LinkLocalAddressing=no
+cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-internal
+NAME="internal"
+DEVICE="internal"
+DEVICETYPE="ovs"
+TYPE="OVSBridge"
+IPADDR="${ministack_SUBNET}.2"
+NETMASK="255.255.255.0"
+GATEWAY="${ministack_SUBNET}.1"
+MACADDR="${MACADDR}"
+OVS_EXTRA="set bridge $DEVICE other-config:hwaddr=$MACADDR"
+ONBOOT="yes"
+OVSBOOTPROTO="static"
+NM_CONTROLLED="no"
 EOF
-````
-#### 05. Disable DHCP on 'eth0' Config
-````sh
-sed 's/BOOTPROTO=dhcp/BOOTPROTO=none/g' etc/sysconfig/network-scripts/ifcfg-eth0
 ````
 #### 06. Write mgmt0 interface ifcfg config
 ````sh

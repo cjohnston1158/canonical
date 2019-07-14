@@ -1,10 +1,10 @@
 # Part 0 -- Host System Preparation
 
 #### Review checklist of prerequisites:
-  1. You have a fresh install of Ubuntu Server 18.04 LTS on a machine with no critical data or services on it
+  1. You have a fresh install of Fedora 30 on a machine with no critical data or services on it
   2. You are familiar with and able to ssh between machines
-  3. You have an ssh key pair, and uploaded the public key to your [Launchpad](https://launchpad.net/) (RECOMMENDED), or [Github](https://github.com/) account
-  4. Run all prep commands as root
+  3. You have an ssh key pair, and uploaded the public key to your [Launchpad](https://launchpad.net/) or [Github](https://github.com/) account
+  4. Run commands as root
   5. Recommended: Follow these guides using ssh to copy/paste commands as you read along
 
 #### 01. Create CCIO Mini-Stack Profile
@@ -14,7 +14,7 @@ wget https://git.io/fjXkH -qO /tmp/profile && source /tmp/profile
 #### 02. Update System && Install helper packages
 ```sh
 dnf update -y && dnf upgrade -y && dnf distro-sync -y
-dnf install -y dnf install neovim lnav openssh-server snapd pastebinit
+dnf install -y dnf install neovim lnav openssh-server snapd pastebinit network-scripts
 ```
 #### 03. Append GRUB Options for Libvirt & Networking Kernel Arguments
 ```sh
@@ -27,7 +27,7 @@ sed -i 's/quiet/debug intel_iommu=on iommu=pt kvm_intel.nested=1 net.ifnames=0 b
 grub2-mkconfig -o /boot/grub2/grub.cfg
 grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
 ```
-#### 04. Write eth0 netplan config
+#### 04. Write eth0 ifcfg scripts config
 ```sh
 cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-eth0
 DEVICE=eth0
