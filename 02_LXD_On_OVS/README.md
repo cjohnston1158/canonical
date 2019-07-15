@@ -10,14 +10,12 @@ Prerequisites:
 ![CCIO_Hypervisor - LXD On OpenvSwitch](web/drawio/lxd-on-openvswitch.svg)
 
 -------
-#### 00. Install Snapd
-````sh
-dnf install snapd
-reboot
-````
 #### 01. Install LXD Packages
 ````sh
 snap install lxd
+usermod -aG lxd ${ministack_UNAME}
+````
+````sh
 reboot
 ````
 #### 02. Initialize LXD
@@ -42,11 +40,6 @@ Trust password for new clients:
 Again:
 Would you like stale cached images to be updated automatically? (yes/no) [default=yes] yes
 Would you like a YAML "lxd init" preseed to be printed? (yes/no) [default=no]: yes
-````
-#### 03. Add your user(s) to the 'lxd' group with the following syntax for each user
-Use your non-root host user name (EG: 'ubuntu')
-````sh
-usermod -aG lxd ${ministack_UNAME}
 ````
 #### 04. Backup the original lxc profile
 ````sh
