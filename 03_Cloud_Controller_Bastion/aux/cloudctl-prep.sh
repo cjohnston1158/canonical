@@ -12,13 +12,15 @@ dnf install -y \
   jq git vim-enhanced tree tmux lnav byobu snapd httpd openssh-server \
   squashfuse python-pip python3-openstackclient python3-keystoneclient \
   python3-cinderclient python3-swiftclient python3-glanceclient \
-  python3-novaclient python3-neutronclient
+  python3-novaclient python3-neutronclient network-scripts
 
 pip install requests
 pip install ssh-import-id
 
 systemctl enable sshd
 systemctl enable httpd
+systemctl enable network 
+systemctl disable NetworkManager
 }
 
 run_add_user () {
