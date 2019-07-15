@@ -28,7 +28,6 @@ adduser --user-group --shell /bin/bash --create-home \
 ssh-import-id ${ccio_SSH_SERVICE}:${ccio_SSH_UNAME}
 su -l ${ministack_UNAME} -c /bin/bash -c 'byobu-enable'
 su -l ${ministack_UNAME} /bin/bash -c "ssh-keygen -f ~/.ssh/id_rsa -N ''"
-echo "${ministack_UNAME} ALL=(ALL) NOPASSWD:ALL" >/etc/visudo.d/${ministack_UNAME} 
 su -l ${ministack_UNAME} /bin/bash -c "ssh-import-id ${ccio_SSH_SERVICE}:${ccio_SSH_UNAME}"
 chown -R ${ministack_UNAME}:${ministack_UNAME} /home/${ministack_UNAME}
 ln -s /var/www/html/mini-stack /home/${ministack_UNAME}/mini-stack
