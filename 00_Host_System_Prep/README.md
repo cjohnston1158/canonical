@@ -7,14 +7,19 @@
   4. Run commands as root
   5. Recommended: Follow these guides using ssh to copy/paste commands as you read along
 
-#### 01. Create CCIO Mini-Stack Profile
+#### 01. Base Setup
 ```sh
-wget https://git.io/fjXkH -qO /tmp/profile && source /tmp/profile
+hostnamectl set-hostname host01.mini-stack.cloud
 ```
-#### 02. Update System && Install helper packages
+#### 01. Update System && Install helper packages
 ```sh
 dnf update -y && dnf upgrade -y && dnf distro-sync -y
-dnf install -y dnf install neovim lnav openssh-server snapd pastebinit network-scripts
+dnf install -y dnf install neovim lnav openssh-server snapd pastebinit network-scripts python-pip
+pip install requests && pip install ssh-import-id
+```
+#### 02. Create CCIO Mini-Stack Profile
+```sh
+wget https://git.io/fjXkH -qO /tmp/profile && source /tmp/profile
 ```
 #### 03. Append GRUB Options for Libvirt & Networking Kernel Arguments
 ```sh
