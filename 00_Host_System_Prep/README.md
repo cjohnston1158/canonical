@@ -29,19 +29,7 @@ sed -i 's/quiet/debug intel_iommu=on iommu=pt kvm_intel.nested=1 net.ifnames=0 b
 grub2-mkconfig -o /boot/grub2/grub.cfg
 grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
 ```
-#### 04. Write eth0 ifcfg scripts config
-```sh
-cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-eth0
-DEVICE=eth0
-BOOTPROTO=dhcp
-ONBOOT=yes
-NM_CONTROLLED="no"
-TYPE=Ethernet
-DHCPV6C=no
-HOTPLUG=yes
-EOF
-```
-#### 05. Reboot
+#### 04. Reboot
 -------
 ## OPTIONAL
 ##### OPT 01. Switch default editor from nano to vim
