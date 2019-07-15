@@ -20,9 +20,6 @@ WARNING: Exercise caution when performing this procedure remotely as this may ca
 #### 01. Install && enable OpenVSwitch Package
 ```sh
 dnf install -y openvswitch network-scripts
-systemctl enable network
-systemctl enable openvswitch
-systemctl disable NetworkManager
 ```
 #### 02. Write physical network ingress port ifcfg Config [EG: 'eth0']
   - NOTE: export name of nic device your primary host network traffic will traverse (EG: 'eth0' in this example)
@@ -113,9 +110,10 @@ chmod +x /usr/bin/ovs-clear && ovs-clear
 cat <<EOF >/tmp/external-setup
 #!/bin/bash
 run_netconfig () {
+systemctl enable network
+systemctl enable openvswitch
+systemctl disable NetworkManager
 systemctl stop NetworkManager
-systemctl stop network
-systemctl stop openvswitch
 systemctl start openvswitch
 ovs-vsctl add-br external
 ovs-vsctl add-br internal
