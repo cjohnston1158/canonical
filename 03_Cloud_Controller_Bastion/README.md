@@ -20,6 +20,7 @@ wget -qO- https://git.io/fjXVP | bash
 lxc launch images:fedora/29 cloudctl -p cloudctl
 lxc file push /tmp/cloudctl-fedora-init.sh cloudctl/tmp/cloudctl-fedora-init.sh
 lxc exec cloudctl -- /bin/bash -c 'source /tmp/cloudctl-fedora-init.sh'
+lxc file push /etc/ccio/mini-stack/profile cloudctl/etc/ccio/mini-stack/
 ````
   - NOTE: wait for cloud-init to finish configuring the container, this may take some time...
 #### 03. Import CloudCtl ssh keys on host

@@ -1,45 +1,52 @@
-#!/bin/bash -x
+#!/bin/bash
+set -x
 
 run_stage_cloudctl_init () {
 cat <<EOINIT >/tmp/cloudctl-fedora-init.sh
-#!/bin/bash -x
+#!/bin/bash
+set -x
 
 run_pkg_inst () {
 dnf update -y
 dnf install -y \
-  jq git vim-enhanced tree tmux lnav byobu snapd httpd \
+  jq git vim-enhanced tree tmux lnav byobu snapd httpd openssh-server \
   squashfuse python-pip python3-openstackclient python3-keystoneclient \
   python3-cinderclient python3-swiftclient python3-glanceclient \
-  python3-novaclient python3-neutronclient 
+  python3-novaclient python3-neutronclient
 
 pip install requests
 pip install ssh-import-id
+
+systemctl enable sshd
+systemctl enable httpd
 }
 
 run_add_user () {
-adduser -D --user-group --shell /bin/bash --create-home \
+adduser --user-group --shell /bin/bash --create-home \
   --home-dir /home/${ministack_UNAME} --groups wheel,lxd ${ministack_UNAME} 
   
 ssh-import-id ${ccio_SSH_SERVICE}:${ccio_SSH_UNAME}
 su -l ${ministack_UNAME} -c /bin/bash -c 'byobu-enable'
 su -l ${ministack_UNAME} /bin/bash -c "ssh-keygen -f ~/.ssh/id_rsa -N ''"
 echo "${ministack_UNAME} ALL=(ALL) NOPASSWD:ALL" >/etc/visudo.d/${ministack_UNAME} 
-su -l ${ministack_UNAME} /bin/bash -c ssh-import-id ${ccio_SSH_SERVICE}:${ccio_SSH_UNAME}
+su -l ${ministack_UNAME} /bin/bash -c "ssh-import-id ${ccio_SSH_SERVICE}:${ccio_SSH_UNAME}"
 chown -R ${ministack_UNAME}:${ministack_UNAME} /home/${ministack_UNAME}
 ln -s /var/www/html/mini-stack /home/${ministack_UNAME}/mini-stack
 update-alternatives --set editor /usr/bin/vim
+echo "source /etc/ccio/mini-stack/profile" >> /etc/bashrc
 }
 
 
 run_add_ms_mirror () {
 mkdir -p /etc/ccio/mini-stack
-git clone https://github.com/containercraft/mini-stack.git /var/www/html/mini-stack
-echo "source /etc/ccio/mini-stack/profile" >> /etc/bashrc
+git clone https://github.com/containercraft/mini-stack.git /home/${ministack_UNAME}/mini-stack
+cd /home/${ministack_UNAME}/mini-stack && git checkout master-mini-stack-rpm && cd ~
+ln -s /home/${ministack_UNAME}/mini-stack /var/www/html/mini-stack
 ln -s /var/www/html/mini-stack /root/mini-stack
 }
 
 run_network_config () {
-cat <<EOF >/etc/sysctl/network-scripts/ifcfg-eth0
+cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-eth0
 NAME="eth0"
 DEVICE="eth0"
 ONBOOT="yes"
@@ -56,7 +63,7 @@ IPV6_DEFROUTE="no"
 IPV6_FAILURE_FATAL="no"
 EOF
 
-cat <<EOF >/etc/sysctl/network-scripts/ifcfg-eth1
+cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-eth1
 NAME="eth1"
 DEVICE="eth1"
 ONBOOT="yes"
