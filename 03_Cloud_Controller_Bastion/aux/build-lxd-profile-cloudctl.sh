@@ -20,7 +20,7 @@ config:
     packages:
       - jq
       - git
-      - vim
+      - vim-enhanced
       - tree
       - tmux
       - lnav
@@ -29,14 +29,13 @@ config:
       - httpd
       - squashfuse
       - python-pip
-      - python-openstackclient
-      - python-keystoneclient
-      - python-cinderclient
-      - python-swiftclient
-      - python-glanceclient
-      - python-novaclient
-      - python-nova-adminclient
-      - python-neutronclient
+      - python3-openstackclient
+      - python3-keystoneclient
+      - python3-cinderclient
+      - python3-swiftclient
+      - python3-glanceclient
+      - python3-novaclient
+      - python3-neutronclient
     users:
       - name: ${ministack_UNAME}
         shell: /bin/bash
