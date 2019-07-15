@@ -24,8 +24,11 @@ systemctl disable NetworkManager
 }
 
 run_add_user () {
-adduser --user-group --shell /bin/bash --create-home \
-  --home-dir /home/${ministack_UNAME} --groups wheel,lxd ${ministack_UNAME} 
+adduser --user-group \
+        --shell /bin/bash \
+        --create-home \
+        --groups wheel \
+        ${ministack_UNAME} 
   
 ssh-import-id ${ccio_SSH_SERVICE}:${ccio_SSH_UNAME}
 su -l ${ministack_UNAME} -c /bin/bash -c 'byobu-enable'
