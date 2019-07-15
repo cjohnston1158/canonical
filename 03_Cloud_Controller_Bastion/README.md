@@ -13,7 +13,7 @@
 -------
 #### 01. Build CloudCTL Profile
 ````sh
-wget -qO- https://git.io/fjXag | bash
+wget -qO- https://git.io/fjXVt | bash
 ````
 #### 02. Build CloudCtl Container
 ````sh
