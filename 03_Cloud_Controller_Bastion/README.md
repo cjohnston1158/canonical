@@ -17,8 +17,9 @@ wget -qO- https://git.io/fjXVt | bash
 ````
 #### 02. Build CloudCtl Container
 ````sh
-lxc launch ubuntu:bionic cloudctl -p cloudctl
-lxc exec cloudctl -- tail -f /var/log/cloud-init-output.log
+lxc launch images:fedora/29 cloudctl -p cloudctl
+lxc file push /tmp/cloudctl-fedora-init.sh cloudctl/tmp/cloudctl-fedora-init.sh
+lxc exec cloudctl -- /bin/bash -c 'source /tmp/cloudctl-fedora-init.sh'
 ````
   - NOTE: wait for cloud-init to finish configuring the container, this may take some time...
 #### 03. Import CloudCtl ssh keys on host
