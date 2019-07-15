@@ -10,11 +10,16 @@ Prerequisites:
 ![CCIO_Hypervisor - LXD On OpenvSwitch](web/drawio/lxd-on-openvswitch.svg)
 
 -------
+#### 00. Install Snapd
+````sh
+dnf install snapd
+reboot
+````
 #### 01. Install LXD Packages
 ````sh
-apt install -y lxd squashfuse zfsutils-linux btrfs-tools && modprobe zfs
+snap install lxd
+reboot
 ````
-
 #### 02. Initialize LXD
 ````sh
 lxd init
@@ -51,15 +56,10 @@ lxc profile copy default original
 ````sh
 wget https://git.io/fjVUx -qO /tmp/build-profile-lxd-default && source /tmp/build-profile-lxd-default
 ````
-#### 06. Add 'lxc' command alias 'ubuntu'/'(your username)' to auto login to containers as user 'ubuntu'
-````sh
-sed -i 's/aliases: {}/aliases:\n  ubuntu: exec @ARGS@ -- sudo --login --user ubuntu/g' ~/.config/lxc/config.yml
-echo "  ${ministack_UNAME}: exec @ARGS@ -- sudo --login --user ${ministack_UNAME}" >> ~/.config/lxc/config.yml
-````
 #### 07. Test Launch New Container
 ````sh
-lxc launch ubuntu:bionic c01
-lxc ${ministack_UNAME} c01
+lxc launch images:centos/7 c01
+lxc exec c01 bash
 exit
 lxc delete --force c01
 ````
