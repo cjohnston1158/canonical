@@ -37,10 +37,11 @@ BOOTPROTO="none"
 TYPE="OVSPort"
 DEVICETYPE="ovs"
 NM_CONTROLLED="no"
-UUID=$(uuidgen ${external_NIC})
 OVS_BRIDGE="external"
 NAME="${external_NIC}"
 DEVICE="${external_NIC}"
+HWADDR="$(ip -o link show ${external_NIC} | awk '{print $(NF-2)}')"
+UUID=$(uuidgen ${external_NIC})
 EOF
 ```
 #### 03. Write OVS  Bridge 'external' ifcfg Config
@@ -60,13 +61,12 @@ NM_CONTROLLED="no"
 DEVICETYPE="ovs"
 TYPE="OVSBridge"
 OVSBOOTPROTO="static"
-OVSBOOTPROTO="static"
-UUID=$(uuidgen internal)
-OVS_EXTRA="set bridge \$DEVICE other-config:hwaddr=\$MACADDR"
 GATEWAY="$(ip r | grep -v "127.0" | awk '/default /{print $3}' | head -n 1)"
-IPADDR="$(ip r | grep -v "127.0" | awk '/default /{print $5}' | head -n 1)"
-MACADDR="${iface_MACADDR}"
+IPADDR=$(ip -o a s $(ip r | grep -v "127.0" | awk '/default /{print $5}' | head -n 1) | awk -F'[ /]' '/inet /{print $7}')
 NETMASK="255.255.255.0"
+MACADDR="${iface_MACADDR}"
+OVS_EXTRA="set bridge \$DEVICE other-config:hwaddr=\$MACADDR"
+UUID=$(uuidgen internal)
 EOF
 ```
 #### 04. Write OVS bridge 'internal' ifcfg Config
@@ -86,12 +86,11 @@ TYPE="OVSBridge"
 BOOTPROTO="static"
 NM_CONTROLLED="no"
 OVSBOOTPROTO="static"
-UUID=$(uuidgen external)
-OVS_EXTRA="set bridge \$DEVICE other-config:hwaddr=\$MACADDR"
-GATEWAY="$(ip r | grep -v "127.0" | awk '/default /{print $3}' | head -n 1)"
-IPADDR="$(ip r | grep -v "127.0" | awk '/default /{print $5}' | head -n 1)"
+IPADDR="${ministack_SUBNET}.2"
 MACADDR="${iface_MACADDR}"
 NETMASK="255.255.255.0"
+OVS_EXTRA="set bridge \$DEVICE other-config:hwaddr=\$MACADDR"
+UUID=$(uuidgen external)
 EOF
 ````
 #### 08. Add OVS Orphan Port Cleaning Utility
