@@ -117,10 +117,8 @@ append_bashrc () {
   cp ~/.bashrc ~/bak/.bashrc_$(date +"%s")
 
   # Build new .bashrc file
-  [[ $(grep mini-stack /etc/skel/.bashrc ; echo $?) == 0 ]] \
-      || echo "source /etc/ccio/mini-stack/profile" >>/etc/skel/.bashrc
-  unalias cp 2>/dev/null \
-  cp -f /etc/skel/.bashrc ~
+  [[ $(grep mini-stack /etc/bashrc ; echo $?) == 0 ]] \
+      || echo "source /etc/ccio/mini-stack/profile" >>/etc/bashrc
 }
 
 #################################################################################

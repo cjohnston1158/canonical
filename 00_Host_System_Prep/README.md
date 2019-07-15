@@ -14,7 +14,7 @@ hostnamectl set-hostname host01.mini-stack.cloud
 #### 01. Update System && Install helper packages
 ```sh
 dnf update -y && dnf upgrade -y && dnf distro-sync -y
-dnf install -y dnf install neovim lnav openssh-server snapd pastebinit network-scripts python-pip
+dnf install neovim lnav openssh-server snapd pastebinit network-scripts python-pip
 pip install requests && pip install ssh-import-id
 ```
 #### 02. Create CCIO Mini-Stack Profile
@@ -22,9 +22,6 @@ pip install requests && pip install ssh-import-id
 wget https://git.io/fjXkH -qO /tmp/profile && source /tmp/profile
 ```
 #### 03. Append GRUB Options for Libvirt & Networking Kernel Arguments
-```sh
-mkdir /etc/default/grub.d 2>/dev/null
-```
 ```sh
 sed -i 's/quiet/debug intel_iommu=on iommu=pt kvm_intel.nested=1 net.ifnames=0 biosdevname=0 pci=noaer/g' /etc/default/grub
 ```
