@@ -17,6 +17,10 @@ dnf update -y && dnf upgrade -y && dnf distro-sync -y
 dnf install neovim lnav openssh-server snapd pastebinit network-scripts python-pip
 pip install requests && pip install ssh-import-id
 ```
+```sh
+sed -i 's/PermitRootLogin yes/PermitRootLogin without-password/g' /etc/ssh/sshd_config
+systemctl start sshd && systemctl enable sshd
+```
 #### 02. Create CCIO Mini-Stack Profile
 ```sh
 wget https://git.io/fjXkH -qO /tmp/profile && source /tmp/profile
