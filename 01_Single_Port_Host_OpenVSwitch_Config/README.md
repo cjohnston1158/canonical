@@ -111,28 +111,22 @@ chmod +x /usr/bin/ovs-clear && ovs-clear
 #### 09. Build OVS Bridge external and apply configuration
 ````sh
 cat <<EOF >/tmp/external-setup
-ovs-vsctl add-br external
+#!/bin/bash
+run_netconfig () {
 systemctl stop NetworkManager
 systemctl stop network
 systemctl stop openvswitch
 systemctl start openvswitch
+ovs-vsctl add-br external
+ovs-vsctl add-br internal
 systemctl start network
+}
+run_netconfig
 ovs-clear
 EOF
 ````
 ````sh
 source /tmp/external-setup
-````
-#### 10. Build OVS Bridge internal and apply configuration
-````sh
-cat <<EOF >/tmp/internal-setup
-ovs-vsctl add-br internal
-systemctl restart network
-ovs-clear
-EOF
-````
-````sh
-source /tmp/internal-setup
 ````
 -------
 ## Next sections
