@@ -11,8 +11,8 @@ dnf update -y
 dnf install -y \
   jq git vim-enhanced tree tmux lnav byobu snapd httpd openssh-server \
   squashfuse python-pip python3-openstackclient python3-keystoneclient \
-  python3-cinderclient python3-swiftclient python3-glanceclient \
-  python3-novaclient python3-neutronclient network-scripts
+  python3-cinderclient python3-swiftclient python3-glanceclient wget \
+  python3-novaclient python3-neutronclient network-scripts sudo
 
 pip install requests
 pip install ssh-import-id
@@ -21,6 +21,12 @@ systemctl enable sshd
 systemctl enable httpd
 systemctl enable network 
 systemctl disable NetworkManager
+
+systemctl start firewalld
+systemctl enable firewalld
+
+firewall-cmd --add-service=http --permanent
+firewall-cmd --reload
 }
 
 run_add_user () {
@@ -35,7 +41,6 @@ su -l ${ministack_UNAME} -c /bin/bash -c 'byobu-enable'
 su -l ${ministack_UNAME} /bin/bash -c "ssh-keygen -f ~/.ssh/id_rsa -N ''"
 su -l ${ministack_UNAME} /bin/bash -c "ssh-import-id ${ccio_SSH_SERVICE}:${ccio_SSH_UNAME}"
 chown -R ${ministack_UNAME}:${ministack_UNAME} /home/${ministack_UNAME}
-ln -s /var/www/html/mini-stack /home/${ministack_UNAME}/mini-stack
 update-alternatives --set editor /usr/bin/vim
 echo "source /etc/ccio/mini-stack/profile" >> /etc/bashrc
 }
@@ -45,7 +50,7 @@ run_add_ms_mirror () {
 mkdir -p /etc/ccio/mini-stack
 git clone https://github.com/containercraft/mini-stack.git /home/${ministack_UNAME}/mini-stack
 cd /home/${ministack_UNAME}/mini-stack && git checkout master-mini-stack-rpm && cd ~
-ln -s /home/${ministack_UNAME}/mini-stack /var/www/html/mini-stack
+ln -s /var/www/html/mini-stack /home/${ministack_UNAME}/mini-stack 
 ln -s /var/www/html/mini-stack /root/mini-stack
 }
 
