@@ -1,51 +1,52 @@
 # Part 00 -- Host System Preparation
 
 #### Review checklist of prerequisites:
-  1. You have a fresh install of Ubuntu Server 18.04 LTS on a machine with no critical data or services on it
+  1. You have a fresh install of Fedora 30 on a machine with no critical data or services on it
   2. You are familiar with and able to ssh between machines
   3. You have an ssh key pair, and uploaded the public key to your [Launchpad](https://launchpad.net/) or [Github](https://github.com/) account
+<<<<<<< HEAD
   4. Run all prep commands as root
   5. Recommended: Follow these guides using ssh to copy/paste commands as you read along
 
 -------
 #### 01. Create CCIO Mini-Stack Profile
+=======
+  4. Run commands as root
+  5. Recommended: Follow these guides using ssh to copy/paste commands as you read along
+
+#### 01. Base Setup
+>>>>>>> 69bce23a27d4484b2f34992ec60e7ab246e99c6d
 ```sh
-wget https://git.io/fjVUb -qO /tmp/profile && source /tmp/profile
+hostnamectl set-hostname host01.mini-stack.cloud
 ```
-#### 02. Update System && Install helper packages
+#### 01. Update System && Install helper packages
 ```sh
-apt update && apt upgrade -y && apt dist-upgrade -y && apt autoremove -y
-apt install --install-recommends -y whois neovim lnav openssh-server ssh-import-id snapd pastebinit linux-generic-hwe-18.04-edge
+dnf update -y && dnf upgrade -y && dnf distro-sync -y
+dnf install neovim lnav openssh-server snapd pastebinit network-scripts python-pip
+pip install requests && pip install ssh-import-id
+```
+```sh
+sed -i 's/PermitRootLogin yes/PermitRootLogin without-password/g' /etc/ssh/sshd_config
+systemctl start sshd && systemctl enable sshd
+```
+#### 02. Create CCIO Mini-Stack Profile
+```sh
+wget https://git.io/fjXkH -qO /tmp/profile && source /tmp/profile
 ```
 #### 03. Append GRUB Options for Libvirt & Networking Kernel Arguments
 ```sh
-mkdir /etc/default/grub.d 2>/dev/null
+sed -i 's/quiet/debug intel_iommu=on iommu=pt kvm_intel.nested=1 net.ifnames=0 biosdevname=0 pci=noaer/g' /etc/default/grub
 ```
 ```sh
-cat <<EOF >/etc/default/grub.d/99-libvirt.cfg
-# Enable PCI Passthrough + Nested Virtual Machines + Revert NIC Interface Naming
-GRUB_CMDLINE_LINUX_DEFAULT="\${GRUB_CMDLINE_LINUX_DEFAULT} debug intel_iommu=on iommu=pt kvm_intel.nested=1 net.ifnames=0 biosdevname=0 pci=noaer"
-EOF
+grub2-mkconfig -o /boot/grub2/grub.cfg
+grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
 ```
-```sh
-update-grub
-```
-#### 04. Write eth0 netplan config
-```sh
-cat <<EOF >/etc/netplan/99-eth0.yaml
-network:
-  version: 2
-  ethernets:
-    eth0:
-      dhcp4: yes
-EOF
-```
-#### 05. Reboot
+#### 04. Reboot
 -------
 ## OPTIONAL
 ##### OPT 01. Switch default editor from nano to vim
 ```sh
-update-alternatives --set editor /usr/bin/vim.tiny
+update-alternatives --set editor /usr/bin/vim
 ```
 ##### OPT 02. Disable Lid Switch Power/Suspend (if building on a laptop)
 ```sh

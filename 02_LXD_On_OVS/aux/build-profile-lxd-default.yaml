@@ -1,5 +1,4 @@
 #!/bin/bash
-
 echo ">   Staging Default Profile ..."
 cat <<EOF > /tmp/lxd-profile-default.yaml
 config:
@@ -24,7 +23,6 @@ config:
         sudo: ['ALL=(ALL) NOPASSWD:ALL']
         ssh_import_id: ${ccio_SSH_UNAME}
     runcmd:
-      - [apt-get, autoremove, "-y"]
       - [cp, "-f", "/etc/skel/.bashrc", "/root/.bashrc"]
       - [cp, "-f", "/etc/skel/.bashrc", "/home/ubuntu/.bashrc"]
       - [cp, "-f", "/etc/skel/.bashrc", "/home/${ministack_UNAME}/.bashrc"]

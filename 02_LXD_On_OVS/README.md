@@ -12,9 +12,12 @@ Prerequisites:
 -------
 #### 01. Install LXD Packages
 ````sh
-apt install -y lxd squashfuse zfsutils-linux btrfs-tools && modprobe zfs
+snap install lxd
+usermod -aG lxd ${ministack_UNAME}
 ````
-
+````sh
+reboot
+````
 #### 02. Initialize LXD
 ````sh
 lxd init
@@ -38,11 +41,6 @@ Again:
 Would you like stale cached images to be updated automatically? (yes/no) [default=yes] yes
 Would you like a YAML "lxd init" preseed to be printed? (yes/no) [default=no]: yes
 ````
-#### 03. Add your user(s) to the 'lxd' group with the following syntax for each user
-Use your non-root host user name (EG: 'ubuntu')
-````sh
-usermod -aG lxd ${ministack_UNAME}
-````
 #### 04. Backup the original lxc profile
 ````sh
 lxc profile copy default original
@@ -51,15 +49,10 @@ lxc profile copy default original
 ````sh
 wget https://git.io/fjVUx -qO /tmp/build-profile-lxd-default && source /tmp/build-profile-lxd-default
 ````
-#### 06. Add 'lxc' command alias 'ubuntu'/'(your username)' to auto login to containers as user 'ubuntu'
-````sh
-sed -i 's/aliases: {}/aliases:\n  ubuntu: exec @ARGS@ -- sudo --login --user ubuntu/g' ~/.config/lxc/config.yml
-echo "  ${ministack_UNAME}: exec @ARGS@ -- sudo --login --user ${ministack_UNAME}" >> ~/.config/lxc/config.yml
-````
 #### 07. Test Launch New Container
 ````sh
-lxc launch ubuntu:bionic c01
-lxc ${ministack_UNAME} c01
+lxc launch images:centos/7 c01
+lxc exec c01 bash
 exit
 lxc delete --force c01
 ````

@@ -17,91 +17,77 @@ WARNING: Exercise caution when performing this procedure remotely as this may ca
 ![CCIO_Hypervisor-mini_Stack_Diagram](web/drawio/single-port-ovs-host.svg)
 
 -------
-#### 01. Update system && Install Packages
+#### 01. Install && enable OpenVSwitch Package
 ```sh
-apt install -y openvswitch-switch
+dnf install -y openvswitch network-scripts
 ```
-#### 02. Write physical network ingress port Networkd Config [EG: 'eth0']
+#### 02. Write physical network ingress port ifcfg Config [EG: 'eth0']
   - NOTE: export name of nic device your primary host network traffic will traverse (EG: 'eth0' in this example)
 ```sh
 export external_NIC="eth0"
 ```
 ```sh
-cat <<EOF >/etc/systemd/network/${external_NIC}.network                                                    
-[Match]
-Name=${external_NIC}
-
-[Network]
-DHCP=no
-IPv6AcceptRA=no
-LinkLocalAddressing=no
+cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-${external_NIC}
+HOTPLUG=no
+ONBOOT="yes"
+BOOTPROTO="none"
+TYPE="OVSPort"
+DEVICETYPE="ovs"
+NM_CONTROLLED="no"
+OVS_BRIDGE="external"
+NAME="${external_NIC}"
+DEVICE="${external_NIC}"
+HWADDR="$(ip -o link show ${external_NIC} | awk '{print $(NF-2)}')"
+UUID=$(uuidgen ${external_NIC})
 EOF
-
 ```
-#### 03. Write OVS  Bridge 'external' Networkd Config
+#### 03. Write OVS  Bridge 'external' ifcfg Config
 ```sh
-cat <<EOF >/etc/systemd/network/external.network                                                    
-[Match]
-Name=external
-
-[Network]
-DHCP=no
-IPv6AcceptRA=no
-LinkLocalAddressing=no
-EOF
-
+export iface_MACADDR=$(echo "${HOSTNAME} ${ministack_SUBNET} external" | md5sum | sed 's/^\(..\)\(..\)\(..\)\(..\)\(..\).*$/02\:\1\:\2\:\3\:\4\:\5/')
 ```
-#### 04. Write OVS bridge 'internal' Networkd Config
-````sh
-cat <<EOF >/etc/systemd/network/internal.network                                                    
-[Match]
-Name=internal
-
-[Network]
-DHCP=no
-IPv6AcceptRA=no
-LinkLocalAddressing=no
+```sh
+cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-external
+DELAY=0
+HOTPLUG=no
+IPV6INIT=no
+ONBOOT="yes"
+NAME="external"
+DEVICE="external"
+BOOTPROTO=static
+NM_CONTROLLED="no"
+DEVICETYPE="ovs"
+TYPE="OVSBridge"
+OVSBOOTPROTO="static"
+GATEWAY="$(ip r | grep -v "127.0" | awk '/default /{print $3}' | head -n 1)"
+IPADDR=$(ip -o a s $(ip r | grep -v "127.0" | awk '/default /{print $5}' | head -n 1) | awk -F'[ /]' '/inet /{print $7}')
+NETMASK="255.255.255.0"
+MACADDR="${iface_MACADDR}"
+OVS_EXTRA="set bridge \$DEVICE other-config:hwaddr=\$MACADDR"
+UUID=$(uuidgen internal)
 EOF
-````
-#### 05. Disable original Netplan Config
+```
+#### 04. Write OVS bridge 'internal' ifcfg Config
+```sh
+export iface_MACADDR=$(echo "${HOSTNAME} ${ministack_SUBNET} internal" | md5sum | sed 's/^\(..\)\(..\)\(..\)\(..\)\(..\).*$/02\:\1\:\2\:\3\:\4\:\5/')
+```
 ````sh
-for yaml in $(ls /etc/netplan/); do sed -i 's/^/#/g' /etc/netplan/${yaml}; done
-````
-#### 06. Write mgmt0 interface netplan config
-````sh
-cat <<EOF >/etc/netplan/80-mgmt0.yaml
-# For more configuration examples, see: https://netplan.io/examples                                                   
-# OVS 'external' Bridge Port 'mgmt0' Configuration
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    mgmt0:
-      optional: true
-      addresses:
-        - $(ip a s ${external_NIC} | awk '/inet /{print $2}' | head -n 1)
-      gateway4: $(ip r | awk '/default /{print $3}' | head -n 1)
-      nameservers:
-        addresses: 
-          - $(systemd-resolve --status | grep "DNS Server" | awk '{print $3}')
-EOF
-
-````
-#### 07. Write mgmt1 interface netplan config
-````sh
-cat <<EOF > /etc/netplan/80-mgmt1.yaml
-# Configure mgmt1 on 'internal' bridge
-# For more configuration examples, see: https://netplan.io/examples
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    mgmt1:
-      optional: true
-      dhcp4: false
-      dhcp6: false
-      addresses:
-        - ${ministack_SUBNET}.2/24
+cat <<EOF >/etc/sysconfig/network-scripts/ifcfg-internal
+DELAY=0
+HOTPLUG=no
+IPV6INIT=no
+ONBOOT="yes"
+NAME="internal"
+DEVICETYPE="ovs"
+DEVICE="internal"
+TYPE="OVSBridge"
+BOOTPROTO="static"
+NM_CONTROLLED="no"
+OVSBOOTPROTO="static"
+IPADDR="${ministack_SUBNET}.2"
+MACADDR="${iface_MACADDR}"
+NETMASK="255.255.255.0"
+OVS_EXTRA="set bridge \$DEVICE other-config:hwaddr=\$MACADDR"
+UUID=$(uuidgen external)
 EOF
 ````
 #### 08. Add OVS Orphan Port Cleaning Utility
@@ -119,43 +105,27 @@ EOF
 ````sh
 chmod +x /usr/bin/ovs-clear && ovs-clear
 ````
-#### 09. Build OVS Bridge external, port mgmt0, and apply configuration
+#### 09. Build OVS Bridge external and apply configuration
 ````sh
-cat <<EOF >/tmp/external-mgmt0-setup
-net_restart () {
-ovs-vsctl \
-  add-br external -- \
-  add-port external ${external_NIC} -- \
-  add-port external mgmt0 -- \
-  set interface mgmt0 type=internal -- \
-  set interface mgmt0 mac="$(echo "${HOSTNAME} external mgmt0" | md5sum | sed 's/^\(..\)\(..\)\(..\)\(..\)\(..\).*$/02\\:\1\\:\2\\:\3\\:\4\\:\5/')"
-systemctl restart systemd-networkd.service && netplan apply --debug
-ovs-clear
+cat <<EOF >/tmp/external-setup
+#!/bin/bash
+run_netconfig () {
+systemctl enable network
+systemctl enable openvswitch
+systemctl disable NetworkManager
+systemctl stop NetworkManager
+systemctl start openvswitch
+ovs-vsctl add-br external
+ovs-vsctl add-br internal
+systemctl start network
 }
-net_restart
-EOF
-
-````
-````sh
-source /tmp/external-mgmt0-setup
-````
-#### 10. Build OVS Bridge external, port mgmt1, and apply configuration
-````sh
-cat <<EOF >/tmp/internal-mgmt1-setup
-ovs-vsctl \
-  add-br internal -- \
-  add-port internal mgmt1 -- \
-  set interface mgmt1 type=internal -- \
-  set interface mgmt1 mac="$(echo "$HOSTNAME internal mgmt1" | md5sum | sed 's/^\(..\)\(..\)\(..\)\(..\)\(..\).*$/02\\:\1\\:\2\\:\3\\:\4\\:\5/')"
-systemctl restart systemd-networkd.service && netplan apply --debug
+run_netconfig
 ovs-clear
 EOF
-
 ````
 ````sh
-source /tmp/internal-mgmt1-setup
+source /tmp/external-setup
 ````
-
 -------
 ## Next sections
 - [Part 02 LXD On Open vSwitch Networks]
