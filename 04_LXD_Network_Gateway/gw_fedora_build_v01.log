@@ -1,0 +1,253 @@
+https://www.lisenet.com/2016/firewalld-rich-and-direct-rules-setup-rhel-7-server-as-a-router/
+    1  clear
+    2  lxc list
+    3  exit
+    4  clear
+    5  ip a
+    6  nmcli d
+    7  systemctl list-unit-files | grep -i net
+    8  cd /etc/systemd/network/
+    9  ls
+   10  vim eth0.network 
+   11  dnf install vim
+   12  vim eth0.network 
+   13  systemctl restart systemd-networkd
+   14  reboot
+   15  clear
+   16  ip a
+   17  ip a
+   18  clear
+   19  cd /etc/systemd/
+   20  ls
+   21  cd network/
+   22  vim eth0.network 
+   23  systemctl restart systemd-networkd
+   24  clear
+   25  vim eth0.network 
+   26  systemctl restart systemd-networkd
+   27  clear
+   28  ls
+   29  vim eth0.network 
+   30  cp eth0.network eth1.network 
+   31  vim eth1.network 
+   32  systemctl restart systemd-networkd
+   33  ip a s internal
+   34  clear
+   35  ip a
+   36  vim eth1.network 
+   37  systemctl restart systemd-networkd
+   38  vim eth1.network 
+   39  ip a
+   40  ip addr del 10.10.0.1/8
+   41  ip addr del 10.10.0.1/8 dev eth1
+   42  clear
+   43  vim eth1.network 
+   44  ip addr del 10.10.0.1/8 dev eth1
+   45  systemctl restart systemd-networkd
+   46  clear
+   47  vim eth1.network 
+   48  vim eth0.network 
+   49  vim eth1.network 
+   50  timedatectl set-timezone America/Denver
+   51  systemctl restart systemd-networkd
+   52  clear
+   53  vim eth1.network 
+   54  systemctl restart systemd-networkd
+   55  vim eth1.network 
+   56  systemctl restart systemd-networkd
+   57  vim eth1.network 
+   58  systemctl restart systemd-networkd
+   59  vim eth1.network 
+   60  systemctl restart systemd-networkd
+   61  clear
+   62  systemctl mask iptables ip6tables ebtables
+   63  clear
+   64  dnf install iptables-services
+   65  systemctl mask iptables ip6tables ebtables
+   66  clear
+   67  firewall-cmd status
+   68  dnf install firewalld
+   69  firewall-cmd status
+   70  firewall-cmd --status
+   71  clear
+   72  firewall-cmd --get-active-zones
+   73  systemctl start firewalld
+   74  systemctl enable firewalld
+   75  clear
+   76  firewall-cmd --get-active-zones
+   77  firewall-cmd --get-default-zone
+   78  firewall-cmd --get-active-zones
+   79  lxc list
+   80  clear
+   81  ip a
+   82  ip r
+   83  clear
+   84  dnf update
+   85  clear
+   86  ip a
+   87  firewall-cmd --set-default-zone=public
+   88  firewall-cmd --remove-interface=eth1 --zone=public
+   89  firewall-cmd --permanent --add-interface=eth1 --zone=dmz
+   90  firewall-cmd --reload
+   91  clear
+   92  firewall-cmd --get-active-zones
+   93  firewall-cmd --permanent --add-interface=eth0 --zone=public
+   94  firewall-cmd --get-active-zones
+   95  firewall-cmd --get-default-zone
+   96  firewall-cmd --get-active-zones
+   97  firewall-cmd --reload
+   98  firewall-cmd --get-active-zones
+   99  clear
+  100  firewall-cmd --get-active-zones
+  101  mcli con mod eth0 connection.zone public
+  102  clear
+  103  firewall-cmd --permanent --zone=dmz --add-service={http,https,ldap,ldaps,kerberos,dns,kpasswd,ntp,ftp}
+  104  # firewall-cmd --reload
+  105  firewall-cmd --list-services --zone=dmz
+  106  firewall-cmd --permanent --zone=dmz --add-service={http,https,ldap,ldaps,kerberos,dns,kpasswd,ntp,ftp}
+  107  # firewall-cmd --reload
+  108  firewall-cmd --list-services --zone=dmz
+  109  firewall-cmd --permanent --zone=dmz --add-service=http
+  110  # firewall-cmd --reload
+  111  systemctl restart firewalld
+  112  firewall-cmd --list-services --zone=dmz
+  113  firewall-cmd --list-services
+  114  firewall-cmd --list-services --zone=dmz
+  115  firewall-cmd --list-services --zone=public
+  116  firewall-cmd --permanent --zone=public --add-masquerade
+  117  firewall-cmd --list-services --zone=public
+  118  # firewall-cmd --reload
+  119  systemctl restart firewalld
+  120  firewall-cmd --list-services --zone=public
+  121  firewall-cmd --zone=public --list-all
+  122  firewall-cmd --permanent --direct --add-rule ipv4 nat POSTROUTING 0 -o eth0 -j MASQUERADE
+  123  firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i enp0s17 -o enp0s8   -p icmp -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
+  124  firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i enp0s17 -o enp0s8   -p tcp -m multiport --dport 80,443 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
+  125  firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i enp0s17 -o enp0s8   -p tcp -m multiport --dport 25,465 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
+  126  firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i enp0s17 -o enp0s8   -p tcp --dport 22 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
+  127  firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i enp0s17 -o enp0s8   -j LOG --log-prefix "forward_fw "
+  128  firewall-cmd --reload
+  129  firewall-cmd --direct --get-all-rules
+  130  systemctl restart firewalld
+  131  firewall-cmd --direct --get-all-rules
+  132  firewall-cmd --reload
+  133  firewall-cmd --list-all --zone=public
+  134  firewall-cmd --permanent --zone=public --add-forward-port='port=22:proto=tcp:toport=22:toaddr=10.10.0.2'
+  135  firewall-cmd --permanent --zone=public --add-rich-rule='rule service name=ssh log prefix="SSH_" level="debug" limit value=1/m reject'
+  136  # firewall-cmd --reload
+  137  firewall-cmd --reload
+  138  firewall-cmd --list-all --zone=public
+  139  systemctl restart firewalld
+  140  systemctl stop firewalld
+  141  clear
+  142  systemctl restart systemd-network
+  143  systemctl restart systemd-networkd
+  144  clear
+  145  systemctl start firewalld
+  146  ls
+  147  cd
+  148  clear
+  149  vim REFRENCE
+  150  clear
+  151  firewall-cmd --permanent --add-service=dhcp --zone=dmz
+  152  firewall-cmd --reload
+  153  clear
+  154  ip a
+  155  clear
+  156  firewall-cmd --permanent --add-service=ssh --zone=dmz
+  157  firewall-cmd --reload
+  158  exit
+  159  clear
+  160  ping 192.168.0.8
+  161  ping 192.168.0.9
+  162  exit
+  163  ls
+  164  vim /etc/systemd/network/eth1.network 
+  165  systemctl restart network
+  166  systemctl restart systemd-networkd
+  167  systemctl restart systemd-network
+  168  clear
+  169  ip a
+  170  dnf update
+  171  clear
+  172  ip a
+  173  exit
+  174  ls
+  175  ip a
+  176  clear
+  177  history | grep firew | grep port
+  178  firewall-cmd --permanent --zone=public --add-forward-port='port=80:proto=tcp:toport=80:toaddr=10.10.0.10'
+  179  firewall-cmd --permanent --zone=public --add-forward-port='port=443:proto=tcp:toport=443:toaddr=10.10.0.10'
+  180  firewall-cmd --reload ; systemctl restart firewalld
+  181  clear
+  182  ip a
+  183  firewall-cmd --permanent --add-port="80/tcp" --add-port="443/tcp" --add-port="5646/tcp" --add-port="5647/tcp" --add-port="5671/tcp" --add-port="5672/tcp"  --add-port="8140/tcp" --add-port="9090/tcp" --add-port="53/udp" --add-port="53/tcp"  --add-port="67/udp" --add-port="68/udp" --add-port="69/udp"
+  184  firewall-cmd --reload
+  185  clear
+  186  exit
+  187  ls
+  188  vim REFRENCE 
+  189  history
+  190  history | tee -a REFRENCE 
+###########################################
+# Generated by dracut initrd
+NAME="ens3"
+DEVICE="ens3"
+ONBOOT="yes"
+NETBOOT="yes"
+UUID="abc5ee64-7091-4d1f-8ede-6564b62fdf91"
+IPV6INIT="yes"
+BOOTPROTO="dhcp"
+TYPE="Ethernet"
+PROXY_METHOD="none"
+BROWSER_ONLY="no"
+DEFROUTE="yes"
+IPV4_FAILURE_FATAL="no"
+IPV6_AUTOCONF="yes"
+IPV6_DEFROUTE="yes"
+IPV6_FAILURE_FATAL="no"
+###########################################
+/etc/systemd/network/eth0.network
+[Match]
+Name=eth0
+
+[Network]
+DHCP=ipv4
+DHCPv6=no
+IPv6AcceptRA=no
+LinkLocalAddressing=ipv4
+
+[DHCP]
+CriticalConnection=true
+###########################################
+/etc/systemd/network/eth1.network
+[Match]
+Name=eth1
+
+[Network]
+DHCPServer=false
+Address=10.10.0.1/16
+Domains=mini-stack.cloud
+DNSDefaultRoute=yes
+IPMasquerade=yes
+IPForward=ipv4
+IPv4ProxyARP=yes
+DHCP=no
+DHCPv6=no
+IPv6AcceptRA=no
+LinkLocalAddressing=ipv4
+
+[DHCP]
+UseDNS=yes
+UseNTP=yes
+UseMTU=yes
+SendHostname=yes
+UseHostname=yes
+Hostname=gw
+
+[DHCPServer]
+EmitDNS=true
+DNS=8.8.8.8
+EmitTimezone=yes
+Timezone="America/Denver"
+DefaultLeaseTimeSec=12h
