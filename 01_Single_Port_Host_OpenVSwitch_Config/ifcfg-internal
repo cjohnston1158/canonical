@@ -1,0 +1,14 @@
+DELAY=0
+HOTPLUG=no
+IPV6INIT=no
+ONBOOT="yes"
+NAME="internal"
+DEVICETYPE="ovs"
+DEVICE="internal"
+TYPE="OVSBridge"
+BOOTPROTO="static"
+NM_CONTROLLED="no"
+OVSBOOTPROTO="none"
+MACADDR="02:24:5d:df:f4:09"
+OVS_EXTRA="set bridge $DEVICE other-config:hwaddr=$MACADDR"
+UUID=e65dfb30-e699-4f0c-ae92-35b4c48e8f00

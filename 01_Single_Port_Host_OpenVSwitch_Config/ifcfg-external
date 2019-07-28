@@ -1,0 +1,16 @@
+DELAY=0
+HOTPLUG=no
+ONBOOT="yes"
+NAME="external"
+DEVICE="external"
+BOOTPROTO="none"
+NM_CONTROLLED="no"
+DEVICETYPE="ovs"
+TYPE="OVSBridge"
+OVSBOOTPROTO="static"
+MACADDR="02:ae:a2:50:53:1e"
+OVS_EXTRA="set bridge $DEVICE other-config:hwaddr=$MACADDR"
+UUID=a9fafaec-1e03-4a3e-859f-7e8a07897e28
+IPV4_FAILURE_FATAL=no
+IPV6_FAILURE_FATAL=no
+IPV6INIT=no
