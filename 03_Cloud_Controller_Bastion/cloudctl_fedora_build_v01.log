@@ -1,0 +1,289 @@
+dnf install sudo
+clear
+ip a
+systemctl status firewalld
+history | grep firewall
+clear
+firewall-cmd --add-port=3389/tcp --permanent 
+firewall-cmd --reload
+clear
+journalctl -fxe
+systemctl list-unit-files | grep tpm
+systemctl disable tpm2-abrmd
+systemctl status tpm2-abrmd
+systemctl stop tpm2-abrmd
+systemctl status tpm2-abrmd
+clear
+history 
+clear
+vim .bashrc 
+vim .bash_history 
+ls
+cd /home/rhadmin/
+ls
+ll thinclient_drives/
+file thinclient_drives/
+clear
+ls
+cd mini-stack/
+cd 03_Cloud_Controller_Bastion/aux/
+ls
+git branch
+rm install-ubuntu-minimal-xrdp.sh xrdp-setup.sh 
+ls
+cp /home/rhadmin/.bash_history ./log
+vim log 
+clear
+vim log 
+mv log fedora-xrdp-setup.sh
+vim fedora-xrdp-setup.sh 
+clear
+ip a
+systemctl status httpd
+firewall-cmd --add-service=http --permanent && firewall-cmd --reload
+clear
+ls
+vim cloudctl-prep.sh 
+su rhadmin
+login rhadmin
+su rhadmin
+ls -lah /var/www
+ls -lah /var/www/html/
+cat /etc/passwd
+cat /etc/passwd | grep http
+ls
+cd
+sudo chown rhadmin:apache -R /home/rhadmin/mini-stack
+chkconfig 
+sestatus 
+mv /home/rhadmin/mini-stack /var/www/html/mini-stack -f
+mv /home/rhadmin/mini-stack /var/www/html/ -f
+rm /var/www/html/mini-stack
+mv /home/rhadmin/mini-stack /var/www/html/ -f
+ln -s /var/www/html/mini-stack /home/rhadmin/
+clear
+ls
+cd mini-stack/
+ls
+cd 03_Cloud_Controller_Bastion/aux/
+ls
+chmod +x fedora-xrdp-setup.sh 
+clear
+ls
+rm group.list 
+clear
+ls
+vim cloudctl-prep.sh 
+ip a
+exit
+cd
+ls
+vim ifcfg-eth1 
+exit
+dnf update -y
+ls
+su katamo
+ls /home/
+su rhadmin
+clear
+cd /etc/sysconfig/network-scripts/
+ls
+mv ifcfg-ens3 ifcfg-eth1
+vim ifcfg-eth1 
+systemctl restart network
+journalctl -xe
+vim ifcfg-eth1 
+journalctl -xe
+vim ifcfg-eth1 
+ip a
+systemctl restart network
+journalctl -xe
+clear
+su rhadmin
+exit
+echo "10.10.0.10 sat.ministack.cloud sat" >>/etc/hosts
+######################################################
+[Match]
+Name=eth0
+
+[Network]
+DHCP=ipv4
+######################################################
+NAME="eth1"
+DEVICE="eth1"
+ONBOOT="yes"
+NETBOOT="yes"
+BOOTPROTO="static"
+TYPE="Ethernet"
+PROXY_METHOD="none"
+BROWSER_ONLY="no"
+DEFROUTE="yes"
+IPV4_FAILURE_FATAL="no"
+IPV6INIT="no"
+IPV6_AUTOCONF="no"
+IPV6_DEFROUTE="no"
+IPV6_FAILURE_FATAL="no"
+######################################################
+exit
+ssh root@10.10.0.2
+clear
+ip a
+sudo su
+exit
+clear
+ls
+ls mini-stack 
+exit
+ls
+rm mini-stack 
+ls
+exit
+sudo su
+exit
+sudo reboot
+passwd
+sudo reboot
+vim .bashrc 
+sudo su
+exit
+ls
+tar xvf tghkeys.tar.xz 
+ls
+ls -lah .
+ls -lah .ssh/
+clear
+ssh root@192.168.0.85
+ping 192.168.0.85
+ip a
+ip r
+ping google.com
+ping 192.168.0.85
+exit
+clear
+cd
+clear
+dnf install libx11-dev
+sudo dnf install -y libx11-dev
+sudo su
+exit
+ls
+rm tghkeys.tar.xz 
+git clone git@github.com:containercraft/mini-stack.git
+clear
+       mkdir -p ~/bin; wget -O ~/bin/ssh goo.gl/MoJuKB; chmod 0755 ~/bin/ssh
+sudo dnf install wget
+       mkdir -p ~/bin; wget -O ~/bin/ssh goo.gl/MoJuKB; chmod 0755 ~/bin/ssh
+       echo 'export PATH=~/bin:$PATH' >> ~/.bashrc
+clear
+ssh root@192.168.0.85
+ping 192.168.0.85
+clear
+ls
+cd mini-stack/03_Cloud_Controller_Bastion/
+cd aux/
+ls
+git checkout master-mini-stack-rpm
+git pull
+clear
+ls
+vim xrdp-setup.sh 
+vim install-ubuntu-minimal-xrdp.sh 
+vim xrdp-setup.sh 
+clear
+dnf grouplist
+dnf grouplist | tee group.list
+vim group.list 
+clear
+cat group.list 
+dnf groupinfo @BasicDesktop
+dnf groupinfo "Basic Desktop"
+cat group.list 
+dnf groupinfo "Fedora Custom Operating System"
+dnf grouplist | grep Work
+dnf groupinfo "Fedora Workstation"
+dnf install @FedoraWorkstation
+sudo dnf install @FedoraWorkstation
+dnf group install "Fedora Workstation"
+dnf groupinstall "Fedora Workstation"
+sudo dnf groupinstall "Fedora Workstation" -y
+sudo dnf install xrdp 
+systemctl start xrdp
+sudo systemctl start xrdp
+sudo systemctl enable xrdp
+firewall-cmd --add-port 3389/tcp --permanent
+clear
+ip a
+ls
+cd
+exit
+cd 
+ll
+sudo ls -lah /var/www/
+exit
+lxc list
+clear
+cd mini-stack/
+ls
+sudo chown rhadmin:root . -R
+ls
+ll
+clear
+cd 03_Cloud_Controller_Bastion/
+vim README.md 
+ls
+ls aux/
+vim README.md 
+ls
+vim aux/cloudctl-prep.sh 
+clear
+git config --global user.name katamo
+git config --global user.email "kat.morgan@braincraft.io"
+clear
+git stage -A
+git commit -m 'rpm branch first build'
+git commit origin master-mini-stack-rpm
+git push origin master-mini-stack-rpm
+clear
+ping 192.168.0.85
+clear
+sudo su
+exit
+ls .ssh/
+ls .ssh
+ll
+cd
+ls .ssh
+clear
+ssh root@10.10.0.10
+ping 10.10.0.10
+ip a
+clear
+cd /etc/systemd/network/
+ls
+cd /etc/sysconfig/network-scripts/
+ls
+mv ifcfg-ens3 ifcfg-eth1
+sudo su
+sudo su
+exit
+sudo su
+killall firefox
+exit
+ip r
+ip r del default via 10.10.0.1
+sudo ip r del default via 10.10.0.1
+ping google.com
+ssh root@10.10.0.2
+cd
+ssh root@10.10.0.10
+exit
+ip a
+ping 10.10.0.10
+curl https://10.10.0.10
+curl https://10.10.0.10:9090
+sudo su
+ping 10.10.0.10
+ssh root@10.10.0.10
+ssh root@10.10.0.2
+vim .ssh/known_hosts
+ssh root@10.10.0.2
