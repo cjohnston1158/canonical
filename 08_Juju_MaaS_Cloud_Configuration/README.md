@@ -12,7 +12,7 @@ Prerequisites:
 - [Part 06 Install Libvirt/KVM on OVS Networks]
 - [Part 07 MAAS Libvirt POD Provider]
 
-![CCIO_Hypervisor - KVM-On-Open-vSwitch](web/drawio/MAAS-Region-And-Rack-Ctl-on-OVS-Sandbox.svg)
+![CCIO_Hypervisor - KVM-On-Open-vSwitch](web/drawio/jujuctl-build.svg)
 
 -------
 #### 01. Enroll MAAS as Juju Cloud Provider
