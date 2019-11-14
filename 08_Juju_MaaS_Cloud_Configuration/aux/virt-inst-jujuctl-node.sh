@@ -3,7 +3,7 @@
 #################################################################################
 # Hardware Profile
 vm_CPU=4
-root_DISK=16   # in Gigabytes
+root_DISK=48   # in Gigabytes
 vm_RAM=4096    # in Megabytes
 vm_COUNT=01    # Set VM spawn count
 storage_POOL="/var/lib/libvirt/images"
@@ -29,7 +29,7 @@ virt-install \
     --boot 'network,hd,useserial=on' \
     --description 'juju maas cloud jujuctl controller node' \
     --network network=internal,model=virtio,mac=${eth0_HWADDRESS} \
-    --disk path=${storage_POOL}/${name_FULL}_vda.qcow2,format=raw,bus=virtio,cache=unsafe,size=16
+    --disk path=${storage_POOL}/${name_FULL}_vda.qcow2,format=raw,bus=virtio,cache=unsafe,size=${root_DISK}
 
 # Prevent the VM from pxe booting to autodiscovery in maas
 sleep 2 && virsh destroy ${name_FULL}
