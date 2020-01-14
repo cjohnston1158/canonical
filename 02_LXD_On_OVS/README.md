@@ -59,7 +59,7 @@ echo "  ${ministack_UNAME}: exec @ARGS@ -- sudo --login --user ${ministack_UNAME
 #### 07. Test Launch New Container
 ````sh
 lxc launch ubuntu:bionic c01
-lxc ${ministack_UNAME} c01
+lxc exec ${ministack_UNAME} c01
 exit
 lxc delete --force c01
 ````
