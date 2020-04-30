@@ -11,9 +11,20 @@ Prerequisites:
 ![CCIO_Hypervisor - LXD On OpenvSwitch](web/drawio/lxd-gateway.svg)
 
 -------
-#### 01. Add the BCIO Remote LXD Image Repo
+#### 01. Install Podman
 ````sh
-lxc remote add bcio https://images.braincraft.io --public --accept-certificate
+. /etc/os-release
+sudo sh -c "echo 'deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list"
+curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/Release.key | sudo apt-key add -
+sudo apt-get update -qq
+sudo apt-get -qq -y install podman
+````
+#### 01. Build & Import image
+````sh
+mkdir /tmp/openwrt
+sudo podman run --privileged --rm -it --name openwrt_builder --volume /tmp/openwrt:/root/bin:z containercraft/ccio-openwrt-builder:19.07.2
+lxc image import /tmp/openwrt/openwrt-19.07.2-x86-64-lxd.tar.gz --alias openwrt/19.07.2/x86_64
+lxc init openwrt/19.07.2/x86_64 gateway -p openwrt
 ````
 #### 02. Create OpenWRT LXD Profile
 ````sh
