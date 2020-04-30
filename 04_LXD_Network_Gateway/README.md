@@ -23,8 +23,8 @@ sudo apt-get -qq -y install podman
 ````sh
 mkdir /tmp/openwrt
 sudo podman run --privileged --rm -it --name openwrt_builder --volume /tmp/openwrt:/root/bin:z containercraft/ccio-openwrt-builder:19.07.2
-lxc image import /tmp/openwrt/openwrt-19.07.2-x86-64-lxd.tar.gz --alias openwrt/19.07.2/x86_64
-lxc init openwrt/19.07.2/x86_64 gateway -p openwrt
+lxc image import /tmp/openwrt/openwrt-19.07.2-x86-64-lxd.tar.gz --alias openwrt
+lxc init openwrt gateway -p openwrt
 ````
 #### 02. Create OpenWRT LXD Profile
 ````sh
